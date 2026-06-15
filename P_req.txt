@@ -1,0 +1,6 @@
+Features of music preference website:
+location pinning
+Photo upload 
+user login using simple mailid and password
+password hashing 
+map view in user interface for others to zoom and look  what other users are listening to at the moment 
