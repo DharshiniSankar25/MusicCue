@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = "jsonwebtoken";
+const DATABASE_URL = "postgresql://neondb_owner:npg_Xh2SHpw1YCAq@ep-wandering-water-atrdtrn6-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 const app = express();
 const rateLimit=require("express-rate-limit")
 const cors = require("cors");
@@ -24,12 +25,9 @@ const limiter = rateLimit({
   max:500,
   message:"Rate limit exceeded"
 });
-const pool=new Pool({
-  user:'postgres',
-  host:'localhost',
-  database:'details',
-  password  :'postgres',
-  port:5432
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
 app.use(limiter)
 function auth(req, res, next) {
