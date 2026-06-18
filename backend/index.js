@@ -3,6 +3,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = "jsonwebtoken";
 const app = express();
+app.set("trust proxy", 1);
 const rateLimit=require("express-rate-limit")
 const cors = require("cors");
 app.use(cors());
