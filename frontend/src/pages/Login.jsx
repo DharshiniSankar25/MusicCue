@@ -9,7 +9,7 @@ function Login() {
 const handleSubmit=async()=>{
     console.log("Button clicked");
     try{
-        const response= await axios.post("http://localhost:5000/login",{
+        const response= await axios.post("https://musiccue.onrender.com/login",{
             email,
             password
 

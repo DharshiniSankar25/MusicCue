@@ -22,7 +22,7 @@ function Mappage(){
 const fetchSongs = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:5000/songs"
+      "https://musiccue.onrender.com/songs"
     );
 
     console.log(response.data);
@@ -36,7 +36,7 @@ const fetchSongs = async () => {
     const handleSubmit=async()=>{
         console.log("Button clicked");
         try{  
-              const response= await axios.post("http://localhost:5000/songs",{
+              const response= await axios.post("https://musiccue.onrender.com/songs",{
                 song,
                 artist,
                 lat,            

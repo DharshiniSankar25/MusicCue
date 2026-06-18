@@ -13,7 +13,7 @@ function Register() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/register",
+        "https://musiccue.onrender.com/register",
         {
           name,
           email,
