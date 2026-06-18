@@ -1,33 +1,24 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = "jsonwebtoken";
-const DATABASE_URL = "postgresql://neondb_owner:npg_Xh2SHpw1YCAq@ep-wandering-water-atrdtrn6-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 const app = express();
 const rateLimit=require("express-rate-limit")
 const cors = require("cors");
 app.use(cors());
 app.use(express.json());
 const bcrypt = require("bcrypt");
-const multer = require('multer');
-const storage = multer.diskStorage( {
-  destination:(req,File,cb)=>{
-    cb(null,"uploads/");
-  },
-  filename:(req,file,cb)=>{
-    cb(null,Date.now()+"-"+file.originalname);
-  }
-}
-);
-const upload=multer({storage});
-const {Pool}=require("pg");
 const limiter = rateLimit({
   windowMs:15*60*1000,
   max:500,
   message:"Rate limit exceeded"
 });
+const { Pool } = require("pg");
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  user: "postgres",
+  host: "localhost",
+  database: "details",
+  password: "postgres",
+  port: 5432,
 });
 app.use(limiter)
 function auth(req, res, next) {
@@ -49,18 +40,25 @@ function auth(req, res, next) {
     return res.status(401).send("Unauthorized");
   }
 }
-try{
-app.post("/Register",async(req,res)=>{
-  const{name,email,password}=req.body;
-  const hashpass=await bcrypt.hash(password,10);
-  await pool.query("INSERT INTO users(name,email,password) VALUES($1,$2,$3)",[name,email,hashpass]);
-  res.send("User registered successfully");
-  
+app.post("/Register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const hashpass = await bcrypt.hash(password, 10);
+
+    await pool.query(
+      "INSERT INTO users(name,email,password) VALUES($1,$2,$3)",
+      [name, email, hashpass]
+    );
+
+    res.send("User registered successfully");
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).send("Server error");
+  }
 });
-} catch(err){
-  console.error(err);
-  res.status(500).send("Server error");
-}
 app.post("/songs" , auth , async (req, res) => {
   try {
 
@@ -87,7 +85,7 @@ app.post("/songs" , auth , async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-app.get("/songs", async (req, res) => {
+app.get("/songs",limiter, async (req, res) => {
   try {
     const result = await pool.query(
      " SELECT songloc.id,songloc.song_name,songloc.artist,songloc.latitude,songloc.longitude, users.name FROM songloc JOIN users ON songloc.user_id = users.id;"
@@ -100,46 +98,46 @@ app.get("/songs", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+app.post('/login', limiter, async(req,res)=>{
 try{
-  app.post('/login',async(req,res)=>{
-    const {email,password}=req.body;
-    const user = await pool.query("SELECT * FROM users WHERE email=$1",[email]);
-    if(user.rows.length===0){
-      return res.status(400).send("Invalid email ");
-    }
-    else{
-      const vpass=await bcrypt.compare(password,user.rows[0].password);
-      if(!vpass){
-        return res.status(400).send("Invalid password");
-      }
-      else{
-          const token = jwt.sign(
-  {
-    id: user.rows[0].id,
-    email: user.rows[0].email
-  },
-  JWT_SECRET,
-  { expiresIn: "1d" }
-);
-console.log("Generated JWT:", token);
 
-res.json({
-  message: "Login successful",
-  token
+   const {email,password}=req.body;
+     const user = await pool.query(
+     "SELECT * FROM users WHERE email=$1",
+     [email]
+   );
+
+   if(user.rows.length===0){
+     return res.status(400).send("Invalid email");
+   }
+
+   const vpass = await bcrypt.compare(password,user.rows[0].password);
+   if(!vpass){
+
+     return res.status(400).send("Invalid password");}
+   const token = jwt.sign(
+   {
+     id:user.rows[0].id,
+     email:user.rows[0].email
+   },
+   JWT_SECRET,
+   {
+     expiresIn:"1d"
+   }
+ );
+   console.log("Generated JWT:", token);
+   res.json({
+     message:"Login successful", token
+   });
+ }
+ catch(error){
+   console.error(error);
+   res.status(500).send("Server error");
+ }
 });
-        }
-      }
-    }
-   ); }
-    
-catch(error){
-  console.error(error);
-  res.status(500).send("Server error");
-}
-app.get("/profile", auth, (req, res) => {
+app.get("/profile", limiter ,auth, (req, res) => {
   res.json(req.user);
 });
-
 app.get("/",(req,res)=>{
   res.send("Backend is Working");
 });

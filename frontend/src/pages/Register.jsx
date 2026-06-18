@@ -20,9 +20,8 @@ function Register() {
           password,
         }
       );
-
+      alert("Registeration successful")
       console.log(response.data);
-      alert("Registration Successful");
       navigate("/Login");
     } catch (error) {
       console.error(error);
