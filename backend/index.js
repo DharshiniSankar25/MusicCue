@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = "jsonwebtoken";
@@ -14,12 +15,11 @@ const limiter = rateLimit({
 });
 const { Pool } = require("pg");
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "details",
-  password: "postgres",
-  port: 5432,
-});
+ connectionString:process.env.DATABASE_URL,
+ ssl:{
+  rejectUnauthorized:false
+ }
+ });
 app.use(limiter)
 function auth(req, res, next) {
   try {
@@ -141,6 +141,8 @@ app.get("/profile", limiter ,auth, (req, res) => {
 app.get("/",(req,res)=>{
   res.send("Backend is Working");
 });
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
