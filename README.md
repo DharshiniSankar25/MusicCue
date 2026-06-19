@@ -60,10 +60,10 @@ MusicCue combines music and geography by allowing users to leave songs at locati
 
 Screenshots
 Desktop View
-![Desktop view](./Screenshots/Desktop view.png)
+![Desktop view](./Screenshots/desktop_view.png)
 
 Mobile View
-![Mobile View](./Screenshots/Mobile view.jpg)
+![Mobile View](./Screenshots/mobile_view.jpg)
 
 
 Developed By : Dharshini Sankar
